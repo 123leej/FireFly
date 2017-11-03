@@ -31,7 +31,8 @@ class Firefly:
                 vectorX = (f.x - self.x)
                 vectorY = (f.y - self.y)
                 currentLen = math.sqrt(vectorX**2 + vectorY**2)         #euclidean distance between the 2 fireflies
-
+		
+		#TODO We Have to Analyse below code!!
                 if currentLen > 50:                                     #fireflies attract each other if their distance is more than 50 pixels apart
                     relBrightness = (f.brightness/currentLen)           #relative brightness of the fireflies is inversely proportional to the currentLen
                     vectorX = vectorX/currentLen                        #normalizing the x vector
@@ -62,7 +63,7 @@ class Firefly:
             self.y = 0
 
 
-for i in range(150):                                                    #this loop generates the fireflies
+for i in range(300):                                                    #this loop generates the fireflies
     x = int(random.randrange(0,1200))                                   #random x coord
     y = int(random.randrange(0,800))                                    #random y coord
     brightness = random.randrange(1, 80)
