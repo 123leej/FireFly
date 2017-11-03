@@ -63,21 +63,26 @@ class Firefly:
             self.y = 0
 
 
-for i in range(300):                                                    #this loop generates the fireflies
-    x = int(random.randrange(0,1200))                                   #random x coord
-    y = int(random.randrange(0,800))                                    #random y coord
-    brightness = random.randrange(1, 80)
-    ffList.append(Firefly(x,y, brightness))
+def run_algorithm(num_node, brightness_range):
+    for i in range(num_node):                                                #this loop generates the fireflies
+        x = int(random.randrange(0, 1200))                                   #random x coord
+        y = int(random.randrange(0, 800))                                    #random y coord
+        brightness = random.randrange(1, brightness_range)
+        ffList.append(Firefly(x, y, brightness))
 
-while True:
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-    
-    screen.fill(pygame.Color(0, 0, 0, 255))
-    for g in ffList:
-        g.Calculations()
-        g.DrawOnScreen()
+    while True:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
 
-    pygame.display.update()
+        screen.fill(pygame.Color(0, 0, 0, 255))
+        for g in ffList:
+            g.Calculations()
+            g.DrawOnScreen()
+
+        pygame.display.update()
+
+
+if __name__ == "__main__":
+    run_algorithm(200, 80)
