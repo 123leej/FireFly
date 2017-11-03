@@ -4,9 +4,11 @@ import random
 import time
 from pygame.locals import*
 
+
 pygame.init()
 screen = pygame.display.set_mode((1200,800),0,32)
 ffList = []
+
 
 class Firefly:
 
@@ -59,23 +61,12 @@ class Firefly:
         if self.y < 0:
             self.y = 0
 
-class Mouse:
-    def __init__(self):
-        (self.x, self.y) = pygame.mouse.get_pos()
-        self.brightness = 600
-        self.r = int(math.sqrt((self.brightness)/math.pi))
-        if self.r < 1:
-            self.r = 1
-
-    def DrawOnScreen(self):
-        pygame.draw.circle(screen, pygame.Color(255,255,255,255), (self.x, self.y), self.r, 0)
 
 for i in range(150):                                                    #this loop generates the fireflies
     x = int(random.randrange(0,1200))                                   #random x coord
     y = int(random.randrange(0,800))                                    #random y coord
-    brightness = random.randrange(1,65)
+    brightness = random.randrange(1, 80)
     ffList.append(Firefly(x,y, brightness))
-ffList.append(Mouse())
 
 while True:
     for event in pygame.event.get():
@@ -83,13 +74,9 @@ while True:
             pygame.quit()
             sys.exit()
     
-    screen.fill(pygame.Color(0,0,0,255))
+    screen.fill(pygame.Color(0, 0, 0, 255))
     for g in ffList:
-        if not isinstance(g, Mouse):
-            g.Calculations()
-            g.DrawOnScreen()
-        else:
-            (g.x, g.y) = pygame.mouse.get_pos()
-            g.DrawOnScreen()
+        g.Calculations()
+        g.DrawOnScreen()
 
     pygame.display.update()
