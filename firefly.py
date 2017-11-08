@@ -2,15 +2,16 @@ import pygame
 import sys
 import math
 import random
-# from pygame.locals import*
+import time
+from pygame.locals import*
 
 
 AGENT_A_X = 200
 AGENT_B_X = 400
 AGENT_Y = 200
 
-# pygame.init()
-# screen = pygame.display.set_mode((600, 400), 0, 32)
+pygame.init()
+screen = pygame.display.set_mode((600, 400), 0, 32)
 ff_list = []
 
 
@@ -27,8 +28,8 @@ class Firefly:
         if self.r < 1:
             self.r = 1  
 
-#    def DrawOnScreen(self):
-#        pygame.draw.circle(screen, pygame.Color(131, 245, 44, 255), (self.x, self.y), self.r, 0)
+    def DrawOnScreen(self):
+        pygame.draw.circle(screen, pygame.Color(131, 245, 44, 255), (self.x, self.y), self.r, 0)
 
     def Calculations(self):
         delta_x = 0
@@ -43,25 +44,25 @@ class Firefly:
                 if f.is_agent:
                     effect_range = self.zone_range
                 else:
-                    effect_range = 50
-
-                if self.current_len > effect_range:
+                    effect_range = 30
+                # ?????
+                if self.current_len < effect_range:
                     rel_brightness = (f.brightness/self.current_len)
                     vector_x = vector_x/self.current_len
                     vector_y = vector_y/self.current_len
                     delta_x += rel_brightness * vector_x
                     delta_y += rel_brightness * vector_y
                 else:
-                    delta_x = random.randrange(-3, 4)
-                    delta_y = random.randrange(-3, 4)
+                    delta_x = random.randrange(-2, 3)
+                    delta_y = random.randrange(-2, 3)
 
-        if abs(delta_x) < 5 and abs(delta_y) < 5:
-            self.x += random.randrange(-4, 5)
-            self.y += random.randrange(-4, 5)
+        if abs(delta_x) < 4 and abs(delta_y) < 4:
+            self.x += random.randrange(-3, 4)
+            self.y += random.randrange(-3, 4)
         else:
             self.x += int(delta_x) + random.randrange(-1, 2)
             self.y += int(delta_y) + random.randrange(-1, 2)
-        
+
         if self.x > 600:
             self.x = 600
         if self.x < 0:
@@ -73,15 +74,19 @@ class Firefly:
 
 
 def find_agent(_ff_list):
-    brightness = [0, 0]
-    result = [0, 0]
+    temp = []
 
     for ff_idx, firefly in enumerate(_ff_list):
-        for idx, agent in enumerate(brightness):
-            if firefly.brightness > agent:
-                brightness[idx] = firefly.brightness
-                result[idx] = ff_idx
-                break
+        temp.append(firefly.brightness)
+
+    agent_a = temp.index(max(temp))
+    temp.remove(max(temp))
+    agent_b = temp.index(max(temp))
+
+    if agent_b < agent_a:
+        result = [agent_a, agent_b]
+    else:
+        result = [agent_a, agent_b+1]
 
     _ff_list[result[0]].is_agent = True
     _ff_list[result[0]].x = AGENT_A_X
@@ -100,18 +105,22 @@ def set_algorithm(num_node, zone_range):
     for i in range(num_node):
         x = int(random.randrange(0, 600))
         y = int(random.randrange(0, 400))
-        brightness = random.randrange(10, 50)
+
+        # test
+        if i < 2:
+            brightness = 100
+        else:
+            brightness = random.randrange(10, 20)
+
         ff_list.append(Firefly(x, y, brightness*10, zone_range))
-        init_data.append([i+1, x, y])
+        init_data.append([i, x, y])
 
     init_data = find_agent(ff_list) + init_data
 
-    for i in range(1):
-        if i == 0:
-            init_data[init_data[i]+1][1] = AGENT_A_X
-        else:
-            init_data[init_data[i]+1][1] = AGENT_B_X
-        init_data[init_data[i]+1][2] = AGENT_Y
+    init_data[init_data[0] + 2][1] = AGENT_A_X
+    init_data[init_data[0] + 2][2] = AGENT_Y
+    init_data[init_data[1] + 2][1] = AGENT_B_X
+    init_data[init_data[1] + 2][2] = AGENT_Y
 
     return init_data
 
@@ -120,27 +129,29 @@ def run_algorithm():
     while True:
         data = []
 
-        # for event in pygame.event.get():
-        #    if event.type == QUIT:
-        #        pygame.quit()
-        #        sys.exit()
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
 
-        # screen.fill(pygame.Color(0, 0, 0, 255))
+        screen.fill(pygame.Color(0, 0, 0, 255))
 
         for idx, g in enumerate(ff_list):
-            # if g.is_agent:
-                # g.DrawOnScreen()
-            # else:
-            g.Calculations()
-            # g.DrawOnScreen()
+            if g.is_agent:
+                g.DrawOnScreen()
+            else:
+                g.Calculations()
+                g.DrawOnScreen()
+            time.sleep(0.005)
             data.append([idx, g.x, g.y])
 
+        # socket udp send
         print(data)
 
-        # pygame.draw.ellipse(screen, pygame.Color(230, 0, 0), [50, 50, 300, 300], 2)
-        # pygame.draw.ellipse(screen, pygame.Color(230, 0, 0), [250, 50, 300, 300], 2)
+        pygame.draw.ellipse(screen, pygame.Color(230, 0, 0), [50, 50, 300, 300], 2)
+        pygame.draw.ellipse(screen, pygame.Color(230, 0, 0), [250, 50, 300, 300], 2)
 
-        # pygame.display.update()
+        pygame.display.update()
 
 
 if __name__ == "__main__":
