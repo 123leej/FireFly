@@ -5,31 +5,34 @@ import random
 import time
 from pygame.locals import*
 
-
+VISUALIZE = False
 AGENT_A_X = 200
 AGENT_B_X = 400
 AGENT_Y = 200
 
-pygame.init()
-screen = pygame.display.set_mode((600, 400), 0, 32)
+if VISUALIZE:
+    pygame.init()
+    screen = pygame.display.set_mode((600, 400), 0, 32)
 ff_list = []
 
 
 class Firefly:
 
-    def __init__(self, x, y, _brightness, _zone_range):
+    def __init__(self, x, y, _brightness):
         self.x = x
         self.y = y
         self.brightness = _brightness
         self.current_len = 0
-        self.zone_range = _zone_range
         self.r = int(math.sqrt(self.brightness / math.pi))
         self.is_agent = False
         if self.r < 1:
             self.r = 1  
 
     def DrawOnScreen(self):
-        pygame.draw.circle(screen, pygame.Color(131, 245, 44, 255), (self.x, self.y), self.r, 0)
+        if VISUALIZE:
+            pygame.draw.circle(screen, pygame.Color(131, 245, 44, 255), (self.x, self.y), self.r, 0)
+        else:
+            pass
 
     def Calculations(self):
         delta_x = 0
@@ -41,12 +44,9 @@ class Firefly:
                 vector_y = (f.y - self.y)
                 self.current_len = math.sqrt(vector_x**2 + vector_y**2)
 
-                if f.is_agent:
-                    effect_range = self.zone_range
-                else:
-                    effect_range = 30
+                effect_range = 150
                 # ?????
-                if self.current_len < effect_range:
+                if self.current_len > effect_range:
                     rel_brightness = (f.brightness/self.current_len)
                     vector_x = vector_x/self.current_len
                     vector_y = vector_y/self.current_len
@@ -99,20 +99,31 @@ def find_agent(_ff_list):
     return result
 
 
-def set_algorithm(num_node, zone_range):
+def cal_length_from_agent(datas):
+    for data in datas:
+        x = data[1]
+        y = data[2]
+
+        len_from_agentA = int(math.sqrt((x-200)**2 + (y-200)**2))
+        len_from_agentB = int(math.sqrt((x-400)**2 + (y-200)**2))
+
+        data.append(len_from_agentA)
+        data.append(len_from_agentB)
+
+
+def set_algorithm(num_node):
     init_data = []
 
     for i in range(num_node):
         x = int(random.randrange(0, 600))
         y = int(random.randrange(0, 400))
 
-        # test
         if i < 2:
             brightness = 100
         else:
             brightness = random.randrange(10, 20)
 
-        ff_list.append(Firefly(x, y, brightness*10, zone_range))
+        ff_list.append(Firefly(x, y, brightness*10))
         init_data.append([i, x, y])
 
     init_data = find_agent(ff_list) + init_data
@@ -122,13 +133,14 @@ def set_algorithm(num_node, zone_range):
     init_data[init_data[1] + 2][1] = AGENT_B_X
     init_data[init_data[1] + 2][2] = AGENT_Y
 
+    cal_length_from_agent(init_data[2:])
+
     return init_data
 
 
 def run_algorithm():
-    while True:
-        data = []
-
+    data = []
+    if VISUALIZE:
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
@@ -136,30 +148,35 @@ def run_algorithm():
 
         screen.fill(pygame.Color(0, 0, 0, 255))
 
-        for idx, g in enumerate(ff_list):
-            if g.is_agent:
-                g.DrawOnScreen()
-            else:
-                g.Calculations()
-                g.DrawOnScreen()
-            time.sleep(0.005)
-            data.append([idx, g.x, g.y])
+    for idx, g in enumerate(ff_list):
+        if g.is_agent:
+            g.DrawOnScreen()
+        else:
+            g.Calculations()
+            g.DrawOnScreen()
 
-        # socket udp send
-        print(data)
-
+        data.append([idx, g.x, g.y])
+    time.sleep(0.005)
+    cal_length_from_agent(data)
+    if VISUALIZE:
         pygame.draw.ellipse(screen, pygame.Color(230, 0, 0), [50, 50, 300, 300], 2)
         pygame.draw.ellipse(screen, pygame.Color(230, 0, 0), [250, 50, 300, 300], 2)
 
         pygame.display.update()
+    return data
 
 
 if __name__ == "__main__":
-    print(set_algorithm(int(sys.argv[1]), int(sys.argv[2])))
+    port = int(sys.argv[2])
+    init_data = set_algorithm(int(sys.argv[1]))
+    # TODO tcp send init_data
+    print(init_data)
+    # TODO receive ok signal
+    while True:
+        # TODO udp send to port run_algorithm()
+        print(run_algorithm())
 
-    run_algorithm()
-
-# args = node 갯수 , zone 영향 범위
-# 초기 설정해줘야 할 항목 : [[에이전트 노드A_index, 에이전트 노드 B_index], [노드_idx, x, y], [노드_idx, x, y], ...]
-# 이후 계속 업데이트 해줘야 할 항목 : [[노드_idx, x, y],[노드_idx, x, y],...]
-
+# args = node 갯수 , 값 전달할 포트
+# 초기 설정해줘야 할 항목 : [[에이전트 노드A_index, 에이전트 노드 B_index], [노드_idx, x, y, agent_A까지 거리, agent_B까지 거리], [노드_idx, x, y, agent_A까지 거리, agent_B까지 거리], ...]
+# 이후 계속 업데이트 해줘야 할 항목 : [[노드_idx, x, y, agent_A까지 거리, agent_B까지 거리],[노드_idx, x, y, agent_A까지 거리, agent_B까지 거리],...]
+# 초기데이터 인자로 받은 포트로 tcp 전송 후 설정 완료 signal 대기, 업데이트 데이터 인자로 받은 포트로 udp 전송
