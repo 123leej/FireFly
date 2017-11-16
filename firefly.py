@@ -1,19 +1,14 @@
-import pygame
 import sys
 import math
 import random
 import time
 import socket
-from pygame.locals import*
 
 VISUALIZE = False
 AGENT_A_X = 200
 AGENT_B_X = 400
 AGENT_Y = 200
 
-if VISUALIZE:
-    pygame.init()
-    screen = pygame.display.set_mode((600, 400), 0, 32)
 ff_list = []
 
 
@@ -27,13 +22,7 @@ class Firefly:
         self.r = int(math.sqrt(self.brightness / math.pi))
         self.is_agent = False
         if self.r < 1:
-            self.r = 1  
-
-    def DrawOnScreen(self):
-        if VISUALIZE:
-            pygame.draw.circle(screen, pygame.Color(131, 245, 44, 255), (self.x, self.y), self.r, 0)
-        else:
-            pass
+            self.r = 1
 
     def Calculations(self):
         delta_x = 0
@@ -141,13 +130,6 @@ def set_algorithm(num_node):
 
 def run_algorithm():
     data = []
-    if VISUALIZE:
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                pygame.quit()
-                sys.exit()
-
-        screen.fill(pygame.Color(0, 0, 0, 255))
 
     for idx, g in enumerate(ff_list):
         if g.is_agent:
@@ -159,11 +141,7 @@ def run_algorithm():
         data.append([idx, g.x, g.y])
     time.sleep(0.005)
     cal_length_from_agent(data)
-    if VISUALIZE:
-        pygame.draw.ellipse(screen, pygame.Color(230, 0, 0), [50, 50, 300, 300], 2)
-        pygame.draw.ellipse(screen, pygame.Color(230, 0, 0), [250, 50, 300, 300], 2)
 
-        pygame.display.update()
     return data
 
 
@@ -172,7 +150,6 @@ if __name__ == "__main__":
     port = int(sys.argv[2])
     init_data = set_algorithm(int(sys.argv[1]))
 
-#TCP First connection
     host = socket.gethostname()
 
     s = socket.socket()
@@ -183,16 +160,12 @@ if __name__ == "__main__":
     if s.recv(1024).decode('utf-8'):
         s.close()
 
-#UDP connection
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(('', 0))
 
     while True:
-    # TODO udp send to port run_algorithm()
-        sock.sendto(str(init_data).encode(), ('127.0.0.1', 8000))
+        sock.sendto(str(run_algorithm()).encode(), ('127.0.0.1', port))
         data, addr = sock.recvfrom(65535)
-        #print(data.decode())
-
 
 # args = node 갯수 , 값 전달할 포트
 # 초기 설정해줘야 할 항목 : [[에이전트 노드A_index, 에이
