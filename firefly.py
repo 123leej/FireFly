@@ -4,7 +4,6 @@ import random
 import time
 import socket
 
-VISUALIZE = False
 AGENT_A_X = 200
 AGENT_B_X = 400
 AGENT_Y = 200
