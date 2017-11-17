@@ -131,11 +131,8 @@ def run_algorithm():
     data = []
 
     for idx, g in enumerate(ff_list):
-        if g.is_agent:
-            g.DrawOnScreen()
-        else:
+        if not g.is_agent:
             g.Calculations()
-            g.DrawOnScreen()
 
         data.append([idx, g.x, g.y])
     time.sleep(0.005)
@@ -146,28 +143,27 @@ def run_algorithm():
 
 if __name__ == "__main__":
 
-    port = int(sys.argv[2])
+    # port = int(sys.argv[2])
     init_data = set_algorithm(int(sys.argv[1]))
+    print(init_data)
+    # host = socket.gethostname()
 
-    host = socket.gethostname()
+    # s = socket.socket()
+    # s.connect((host, port))
+    # print('Connected to', host)
 
-    s = socket.socket()
-    s.connect((host, port))
-    print('Connected to', host)
+    # s.send(str(init_data).encode('utf-8'))
+    # if s.recv(1024).decode('utf-8'):
+    #     s.close()
 
-    s.send(str(init_data).encode('utf-8'))
-    if s.recv(1024).decode('utf-8'):
-        s.close()
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind(('', 0))
+    # sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    # sock.bind(('', 0))
 
     while True:
-        sock.sendto(str(run_algorithm()).encode(), ('127.0.0.1', port))
-        data, addr = sock.recvfrom(65535)
-
+    #     sock.sendto(str(run_algorithm()).encode(), ('127.0.0.1', port))
+    #     data, addr = sock.recvfrom(65535)
+        print(run_algorithm())
 # args = node 갯수 , 값 전달할 포트
-# 초기 설정해줘야 할 항목 : [[에이전트 노드A_index, 에이
-# 전트 노드 B_index], [노드_idx, x, y, agent_A까지 거리, agent_B까지 거리], [노드_idx, x, y, agent_A까지 거리, agent_B까지 거리], ...]
+# 초기 설정해줘야 할 항목 : [에이전트 노드A_index, 에이전트 노드 B_index, [노드_idx, x, y, agent_A까지 거리, agent_B까지 거리], [노드_idx, x, y, agent_A까지 거리, agent_B까지 거리], ...]
 # 이후 계속 업데이트 해줘야 할 항목 : [[노드_idx, x, y, agent_A까지 거리, agent_B까지 거리],[노드_idx, x, y, agent_A까지 거리, agent_B까지 거리],...]
 # 초기데이터 인자로 받은 포트로 tcp 전송 후 설정 완료 signal 대기, 업데이트 데이터 인자로 받은 포트로 udp 전송
