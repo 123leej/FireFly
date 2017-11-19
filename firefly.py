@@ -2,21 +2,21 @@ import sys
 import math
 import random
 import time
-import socket
 
-AGENT_A_X = 200
-AGENT_B_X = 400
-AGENT_Y = 200
+AGENT_A_X = 255
+AGENT_B_X = 506
+AGENT_Y = 205
 
 ff_list = []
 
 
 class Firefly:
 
-    def __init__(self, x, y, _brightness):
+    def __init__(self, x, y, _brightness, _zone_effect_range):
         self.x = x
         self.y = y
         self.brightness = _brightness
+        self.zone_effect_range = _zone_effect_range
         self.current_len = 0
         self.r = int(math.sqrt(self.brightness / math.pi))
         self.is_agent = False
@@ -33,9 +33,7 @@ class Firefly:
                 vector_y = (f.y - self.y)
                 self.current_len = math.sqrt(vector_x**2 + vector_y**2)
 
-                effect_range = 150
-                # ?????
-                if self.current_len > effect_range:
+                if self.current_len > self.zone_effect_range:
                     rel_brightness = (f.brightness/self.current_len)
                     vector_x = vector_x/self.current_len
                     vector_y = vector_y/self.current_len
@@ -52,12 +50,12 @@ class Firefly:
             self.x += int(delta_x) + random.randrange(-1, 2)
             self.y += int(delta_y) + random.randrange(-1, 2)
 
-        if self.x > 600:
-            self.x = 600
+        if self.x > 761:
+            self.x = 761
         if self.x < 0:
             self.x = 0
-        if self.y > 400:
-            self.y = 400
+        if self.y > 411:
+            self.y = 411
         if self.y < 0:
             self.y = 0
 
@@ -93,26 +91,33 @@ def cal_length_from_agent(datas):
         x = data[1]
         y = data[2]
 
-        len_from_agentA = int(math.sqrt((x-200)**2 + (y-200)**2))
-        len_from_agentB = int(math.sqrt((x-400)**2 + (y-200)**2))
+        len_from_agentA = int(math.sqrt((x-AGENT_A_X)**2 + (y-AGENT_Y)**2))
+        len_from_agentB = int(math.sqrt((x-AGENT_B_X)**2 + (y-AGENT_Y)**2))
 
         data.append(len_from_agentA)
         data.append(len_from_agentB)
 
 
-def set_algorithm(num_node):
+def set_algorithm(num_node, zone_range):
     init_data = []
+    agent_a = random.randrange(0, num_node)
+    agent_b = random.randrange(0, num_node)
+
+    while True:
+        if agent_a != agent_b:
+            break
+        agent_b = random.randrange(0, num_node)
 
     for i in range(num_node):
-        x = int(random.randrange(0, 600))
-        y = int(random.randrange(0, 400))
+        x = int(random.randrange(0, 761))
+        y = int(random.randrange(0, 411))
 
-        if i < 2:
+        if i is agent_a or i is agent_b:
             brightness = 100
         else:
             brightness = random.randrange(10, 20)
 
-        ff_list.append(Firefly(x, y, brightness*10))
+        ff_list.append(Firefly(x, y, brightness*10, zone_range))
         init_data.append([i, x, y])
 
     init_data = find_agent(ff_list) + init_data
@@ -143,26 +148,13 @@ def run_algorithm():
 
 if __name__ == "__main__":
 
-    # port = int(sys.argv[2])
-    init_data = set_algorithm(int(sys.argv[1]))
+    init_data = set_algorithm(int(sys.argv[1]), int(sys.argv[2]))
     print(init_data)
-    # host = socket.gethostname()
-
-    # s = socket.socket()
-    # s.connect((host, port))
-    # print('Connected to', host)
-
-    # s.send(str(init_data).encode('utf-8'))
-    # if s.recv(1024).decode('utf-8'):
-    #     s.close()
-
-    # sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    # sock.bind(('', 0))
 
     while True:
-    #     sock.sendto(str(run_algorithm()).encode(), ('127.0.0.1', port))
-    #     data, addr = sock.recvfrom(65535)
         print(run_algorithm())
+
+
 # args = node 갯수 , 값 전달할 포트
 # 초기 설정해줘야 할 항목 : [에이전트 노드A_index, 에이전트 노드 B_index, [노드_idx, x, y, agent_A까지 거리, agent_B까지 거리], [노드_idx, x, y, agent_A까지 거리, agent_B까지 거리], ...]
 # 이후 계속 업데이트 해줘야 할 항목 : [[노드_idx, x, y, agent_A까지 거리, agent_B까지 거리],[노드_idx, x, y, agent_A까지 거리, agent_B까지 거리],...]
