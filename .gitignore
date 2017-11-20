@@ -1,1 +1,13 @@
 .idea
+
+*.spec
+
+*.so
+
+*.pyc
+
+build/firefly/base_library\.zip
+
+build/firefly/
+
+dist/firefly/
