@@ -33,7 +33,12 @@ class Firefly:
                 vector_y = (f.y - self.y)
                 self.current_len = math.sqrt(vector_x**2 + vector_y**2)
 
-                if self.current_len > self.zone_effect_range:
+                if self.is_agent:
+                    zone_range = self.zone_effect_range
+                else:
+                    zone_range = 50
+
+                if self.current_len > zone_range:
                     rel_brightness = (f.brightness/self.current_len)
                     vector_x = vector_x/self.current_len
                     vector_y = vector_y/self.current_len
@@ -155,7 +160,17 @@ if __name__ == "__main__":
         print(run_algorithm())
 
 
-# args = node 갯수 , 값 전달할 포트
-# 초기 설정해줘야 할 항목 : [에이전트 노드A_index, 에이전트 노드 B_index, [노드_idx, x, y, agent_A까지 거리, agent_B까지 거리], [노드_idx, x, y, agent_A까지 거리, agent_B까지 거리], ...]
-# 이후 계속 업데이트 해줘야 할 항목 : [[노드_idx, x, y, agent_A까지 거리, agent_B까지 거리],[노드_idx, x, y, agent_A까지 거리, agent_B까지 거리],...]
-# 초기데이터 인자로 받은 포트로 tcp 전송 후 설정 완료 signal 대기, 업데이트 데이터 인자로 받은 포트로 udp 전송
+# args = node 갯수 , zone_range
+# node_data = [노드_idx, x, y, agent_A까지 거리, agent_B까지 거리]
+# 초기 설정해줘야 할 항목 : [에이전트 노드A_index, 에이전트 노드 B_index, node_data1, node_data2, node_data3, node_data4,....]
+# 이후 계속 업데이트 해줘야 할 항목 : [node_data1, node_data2, node_data3, node_data4, ....]
+# 초기 설정해줘야 할 항목 및 계속 업데이트 해줘야 할 항목은 터미널에서 실행했을때 값을 print 로 찍어내면 됨
+# ex) (에이전트노드가 각각 0, 1 인덱스라고 할때)
+# [0, 1, [0, x, y, 0, n], [1, x, y, n, 0], [2, x, y, n, n], [3, x, y, n, n], [4, x, y, n, n], [5, x, y, n, n],...]
+# [[0, x, y, 0, n], [1, x, y, n, 0], [2, x, y, n, n], [3, x, y, n, n], [4, x, y, n, n], [5, x, y, n, n],...]
+# [[0, x, y, 0, n], [1, x, y, n, 0], [2, x, y, n, n], [3, x, y, n, n], [4, x, y, n, n], [5, x, y, n, n],...]
+# [[0, x, y, 0, n], [1, x, y, n, 0], [2, x, y, n, n], [3, x, y, n, n], [4, x, y, n, n], [5, x, y, n, n],...]
+# [[0, x, y, 0, n], [1, x, y, n, 0], [2, x, y, n, n], [3, x, y, n, n], [4, x, y, n, n], [5, x, y, n, n],...]
+# ...
+#
+# 화면 크기는 width = 761, height = 411
